@@ -1,23 +1,50 @@
-steps:
-  - name: Checkout repository code
-    uses: actions/checkout@v4
+# .github/workflows/ci.yml
 
-  - name: Set up Python 3.9
-    uses: actions/setup-python@v4
-    with:
-      python-version: '3.9'
+name: Model Retraining Workflow
 
-  - name: Install Dependencies
-    # Menginstal MLflow dan dependensi yang diperlukan untuk menjalankan project
-    run: pip install mlflow pandas scikit-learn
+# Trigger workflow ketika ada push
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'MLProject/**' 
 
-  - name: Run MLflow Project (Model Retraining)
-    # Menjalankan project dari folder MLProject
-    # MLFLOW_TRACKING_URI diatur secara default ke folder 'mlruns' lokal di runner
-    run: |
-      cd MLProject
-      mlflow run .
-    env:
-      # Dalam skenario Basic, tracking dilakukan ke folder lokal 'mlruns'
-      # Untuk kriteria Skilled/Advance, ini harus diarahkan ke remote server
-      MLFLOW_TRACKING_URI: file:./mlruns
+jobs:
+  run-mlflow-project:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        # Menginstal MLflow dan dependensi
+        run: pip install mlflow pandas scikit-learn
+
+      - name: Run MLflow Project (Model Retraining)
+        # Menjalankan project, hasil tracking disimpan ke MLProject/mlruns
+        run: |
+          cd MLProject
+          # Perintah ini menjalankan modelling.py dan mencatat ke folder mlruns
+          mlflow run .
+        env:
+          # Mengarahkan MLflow Tracking ke folder lokal 'mlruns'
+          MLFLOW_TRACKING_URI: file:./mlruns
+
+      # =========================================================
+      # 🎯 KRITERIA SKILLED (3 PTS): MENYIMPAN ARTEFAK 🎯
+      # =========================================================
+      - name: Upload MLflow Artifacts to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          # Nama Artifact unik, menggunakan SHA commit
+          name: mlflow-artifacts-model-${{ github.sha }}
+          # Path folder yang berisi semua data MLflow (model, logs, dll.)
+          path: MLProject/mlruns
+          retention-days: 7

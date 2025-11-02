@@ -1,0 +1,13 @@
+# MLProject/MLProject
+
+name: Iris-Classification-CI
+
+parameters:
+  input_data:
+    type: path
+    default: namadataset_preprocessing/iris_processed.csv # Path relatif ke data
+
+entry_points:
+  main:
+    command: "python modelling.py --input_data {input_data}"
+    parameters: [input_data]
