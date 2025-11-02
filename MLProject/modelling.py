@@ -18,13 +18,13 @@ def load_processed_data(input_path):
     try:
         print(f"Mengambil data dari path: {input_path}")
         df = pd.read_csv(input_path)
-        print("✅ Dataset processed berhasil dimuat")
+        print(" Dataset processed berhasil dimuat")
         return df
     except FileNotFoundError:
-        print(f"❌ File tidak ditemukan: {input_path}.")
+        print(f" File tidak ditemukan: {input_path}.")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Error saat memuat dataset: {e}")
+        print(f" Error saat memuat dataset: {e}")
         sys.exit(1)
 
 def train_model(df):
@@ -40,7 +40,7 @@ def train_model(df):
     feature_columns = [col for col in df.columns if col not in target_columns and col != 'Unnamed: 0']
     
     if not target_columns:
-        print("❌ Kolom target 'Species_' tidak ditemukan.")
+        print(" Kolom target 'Species_' tidak ditemukan.")
         return
 
     X = df[feature_columns]
@@ -67,13 +67,13 @@ def train_model(df):
         
         y_pred = model.predict(X_test)
         
-        print("\n✅ Model berhasil dilatih dan dicatat.")
+        print("\n Model berhasil dilatih dan dicatat.")
         
         # Evaluasi
         accuracy = accuracy_score(y_test, y_pred)
         print(f"\nAkurasi pada data uji: {accuracy:.4f}")
         
-    print("\n🎯 Model Training Selesai!")
+    print("\n Model Training Selesai!")
 
 
 def main():

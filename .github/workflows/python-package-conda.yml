@@ -38,7 +38,7 @@ jobs:
           MLFLOW_TRACKING_URI: file:./mlruns
 
       # =========================================================
-      # 🎯 KRITERIA SKILLED (3 PTS): MENYIMPAN ARTEFAK 🎯
+      # KRITERIA SKILLED (3 PTS): MENYIMPAN ARTEFAK 
       # =========================================================
       - name: Upload MLflow Artifacts to GitHub
         uses: actions/upload-artifact@v4
