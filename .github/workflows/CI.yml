@@ -17,23 +17,17 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
     
-    - name: Install Miniconda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        auto-update-conda: true
-        python-version: '3.9'
-        miniconda-version: "latest"
-    
-    - name: Install MLflow
+    - name: Install dependencies
       run: |
-        pip install mlflow
+        pip install --upgrade pip
+        pip install mlflow pandas scikit-learn
     
     - name: Run MLflow Project
       run: |
@@ -43,7 +37,8 @@ jobs:
         MLFLOW_TRACKING_URI: file:///tmp/mlruns
     
     - name: Upload MLflow Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: mlflow-artifacts
         path: /tmp/mlruns/
