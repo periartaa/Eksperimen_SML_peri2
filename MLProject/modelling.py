@@ -116,7 +116,25 @@ def main():
     if len(sys.argv) > 1:
         processed_file_path = sys.argv[1]
     else:
-        processed_file_path = 'iris_processed.csv'
+        # 🌟 PERBAIKAN: Cek beberapa lokasi yang mungkin 🌟
+        possible_paths = [
+            'namadataset_preprocessing/iris_processed.csv',
+            'iris_processed.csv',
+            '../iris_processed.csv'
+        ]
+        
+        processed_file_path = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                processed_file_path = path
+                break
+        
+        if processed_file_path is None:
+            print("❌ File iris_processed.csv tidak ditemukan di lokasi manapun!")
+            print(f"Lokasi yang dicek: {possible_paths}")
+            print(f"Current directory: {os.getcwd()}")
+            print(f"Files available: {os.listdir('.')}")
+            sys.exit(1)
     
     print(f"📂 Loading data from: {processed_file_path}")
     
