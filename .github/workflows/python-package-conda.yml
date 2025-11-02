@@ -1,0 +1,23 @@
+steps:
+  - name: Checkout repository code
+    uses: actions/checkout@v4
+
+  - name: Set up Python 3.9
+    uses: actions/setup-python@v4
+    with:
+      python-version: '3.9'
+
+  - name: Install Dependencies
+    # Menginstal MLflow dan dependensi yang diperlukan untuk menjalankan project
+    run: pip install mlflow pandas scikit-learn
+
+  - name: Run MLflow Project (Model Retraining)
+    # Menjalankan project dari folder MLProject
+    # MLFLOW_TRACKING_URI diatur secara default ke folder 'mlruns' lokal di runner
+    run: |
+      cd MLProject
+      mlflow run .
+    env:
+      # Dalam skenario Basic, tracking dilakukan ke folder lokal 'mlruns'
+      # Untuk kriteria Skilled/Advance, ini harus diarahkan ke remote server
+      MLFLOW_TRACKING_URI: file:./mlruns
