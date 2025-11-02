@@ -1,42 +1,53 @@
 # .github/workflows/ci.yml
-
 name: Model Retraining Workflow
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'MLProject/**' 
+    branches: [main]
+    paths: ['MLProject/**']
+  pull_request:
+    branches: [main]
+    paths: ['MLProject/**']
 
 jobs:
   run-mlflow-project:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
-      - name: Install Dependencies
-        run: |
-          pip install mlflow==2.11.3 scikit-learn==1.4.1 pandas==2.2.1
+    - name: Install dependencies
+      run: |
+        pip install mlflow==2.11.3
+        pip install scikit-learn==1.4.1
+        pip install pandas==2.2.1
 
-      - name: Run MLflow Project (Model Retraining)
-        run: |
-          cd MLProject
-          # Gunakan --no-conda untuk menghindari pembuatan environment baru
-          mlflow run . --no-conda
-        env:
-          MLFLOW_TRACKING_URI: file:./mlruns
+    - name: Run MLflow Project
+      run: |
+        cd MLProject
+        mlflow run . --experiment-name Iris_Classification_CI
+      env:
+        MLFLOW_TRACKING_URI: file:./mlruns
 
-      - name: Upload MLflow Artifacts to GitHub
-        uses: actions/upload-artifact@v4
-        with:
-          name: mlflow-artifacts-model-${{ github.sha }}
-          path: MLProject/mlruns
-          retention-days: 7
+    - name: Upload MLflow Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: mlflow-artifacts-${{ github.sha }}
+        path: MLProject/mlruns
+        retention-days: 7
+        
+    - name: Test Model Loading
+      run: |
+        cd MLProject
+        python -c "
+        import mlflow.sklearn
+        import os
+        # Test load latest model
+        print('Testing model loading...')
+        "

@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Peri/DICODING/ACCOUNT%20StudentPro/Eksperimen_SML_periart2/MLProject/mlruns/929592909057583163/models/m-87d573529bbf4020820056db6377dfe4/artifacts
+creation_timestamp: 1762087400026
+experiment_id: '929592909057583163'
+last_updated_timestamp: 1762087404306
+model_id: m-87d573529bbf4020820056db6377dfe4
+model_type: null
+name: model
+source_run_id: 823957616a36423981a42e430ea83a74
+status: 2
+status_message: null
