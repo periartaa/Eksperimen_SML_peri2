@@ -39,7 +39,7 @@ jobs:
     - name: Run MLflow Project (Direct Python)
       run: |
         cd MLProject
-        python modelling.py iris_processed.csv
+        python modelling.py namadataset_preprocessing/iris_processed.csv
       env:
         MLFLOW_TRACKING_URI: file:///tmp/mlruns
     
