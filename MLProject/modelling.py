@@ -19,13 +19,11 @@ def load_processed_data(input_path):
     try:
         print(f"Mengambil data dari path: {input_path}")
         
-        # Cek apakah file exists
         if not os.path.exists(input_path):
             raise FileNotFoundError(f"File tidak ditemukan: {input_path}")
             
         df = pd.read_csv(input_path)
         print(f" Dataset berhasil dimuat. Shape: {df.shape}")
-        print(f" Kolom: {df.columns.tolist()}")
         return df
         
     except FileNotFoundError as e:
@@ -49,12 +47,11 @@ def train_model(df):
     
     if not target_columns:
         print(" ERROR: Kolom target 'Species_' tidak ditemukan.")
-        print(f" Kolom yang tersedia: {df.columns.tolist()}")
         return
 
     X = df[feature_columns]
     y_ohe = df[target_columns] 
-    y = y_ohe.idxmax(axis=1) # Konversi OHE ke Label Tunggal
+    y = y_ohe.idxmax(axis=1)
     
     print(f" Fitur: {X.shape[1]} kolom")
     print(f" Target classes: {y.unique()}")
@@ -87,25 +84,13 @@ def train_model(df):
         accuracy = accuracy_score(y_test, y_pred)
         mlflow.log_metric("accuracy", accuracy)
         
-        # Log classification report sebagai artifact
-        report = classification_report(y_test, y_pred, output_dict=True)
-        report_df = pd.DataFrame(report).transpose()
-        report_df.to_csv("classification_report.csv")
-        mlflow.log_artifact("classification_report.csv")
-        
         print(f"\n Model berhasil dilatih. Run ID: {run.info.run_id}")
         print(f" Akurasi pada data uji: {accuracy:.4f}")
-        
-        # Log informasi tambahan
-        mlflow.log_param("feature_columns", feature_columns)
-        mlflow.log_param("target_columns", target_columns)
         
     print("\n Model Training Selesai!")
 
 def main():
-    # Inisialisasi Argument Parser
     parser = argparse.ArgumentParser(description="Menjalankan training model Iris Classification.")
-    # Argumen yang diterima dari MLProject
     parser.add_argument("--input_data", type=str, required=True, 
                         help="Path relatif ke file CSV data yang sudah diproses.")
     

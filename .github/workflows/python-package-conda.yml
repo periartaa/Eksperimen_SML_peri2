@@ -1,6 +1,5 @@
 name: Model Retraining Workflow
 
-# Trigger workflow ketika ada push
 on:
   push:
     branches:
@@ -28,36 +27,17 @@ jobs:
           pip install pandas==2.2.1
           pip install scikit-learn==1.4.1
 
-      - name: Run MLflow Project (Model Retraining)
+      - name: Run MLflow Project
         run: |
           cd MLProject
-          # Pastikan folder mlruns ada
           mkdir -p mlruns
-          # Jalankan project MLflow
           mlflow run . --no-conda
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
 
-      # =========================================================
-      # KRITERIA SKILLED (3 PTS): MENYIMPAN ARTEFAK 
-      # =========================================================
       - name: Upload MLflow Artifacts to GitHub
         uses: actions/upload-artifact@v4
         with:
           name: mlflow-artifacts-${{ github.sha }}
           path: MLProject/mlruns/
           retention-days: 30
-
-      # OPSIONAL: Upload model sebagai artifact terpisah
-      - name: Upload Model Files
-        run: |
-          cd MLProject
-          # Cari file model terbaru
-          find mlruns -name "model.pkl" -o -name "MLmodel" | head -5
-        continue-on-error: true
-
-      # OPSIONAL: Simpan juga ke Google Drive (jika diperlukan)
-      - name: Setup Google Drive CLI (Optional)
-        if: false() # Nonaktifkan dulu, aktifkan jika punya akses Google Drive
-        run: |
-          echo "Setup Google Drive integration would go here"
