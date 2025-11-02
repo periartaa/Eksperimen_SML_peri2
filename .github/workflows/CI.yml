@@ -29,10 +29,17 @@ jobs:
         pip install --upgrade pip
         pip install mlflow pandas scikit-learn
     
-    - name: Run MLflow Project
+    - name: List files
+      run: |
+        echo "Current directory:"
+        pwd
+        echo "Files in MLProject:"
+        ls -la MLProject/
+    
+    - name: Run MLflow Project (Direct Python)
       run: |
         cd MLProject
-        mlflow run . --no-conda
+        python modelling.py iris_processed.csv
       env:
         MLFLOW_TRACKING_URI: file:///tmp/mlruns
     
@@ -43,3 +50,13 @@ jobs:
         name: mlflow-artifacts
         path: /tmp/mlruns/
         retention-days: 30
+        
+    - name: Show MLflow runs
+      if: always()
+      run: |
+        if [ -d "/tmp/mlruns" ]; then
+          echo "MLflow runs created:"
+          ls -la /tmp/mlruns/
+        else
+          echo "No MLflow runs directory found"
+        fi
