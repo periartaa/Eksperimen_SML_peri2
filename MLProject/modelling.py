@@ -61,8 +61,9 @@ def train_model(df):
         X, y, test_size=0.3, random_state=42, stratify=y
     )
     
-    # Setup MLflow
+    # Setup MLflow - menggunakan local artifact
     experiment_name = "Iris_Classification_CI_Skilled"
+    mlflow.set_tracking_uri("./mlruns")  # Local directory
     mlflow.set_experiment(experiment_name)
     
     # AKTIVASI MLFLOW AUTOLOG
@@ -94,7 +95,7 @@ def main():
     parser.add_argument("--input_data", type=str, required=True, 
                         help="Path relatif ke file CSV data yang sudah diproses.")
     
-    args, unknown = parser.parse_known_args()
+    args = parser.parse_args()
     
     print("="*50)
     print("IRIS CLASSIFICATION TRAINING")
