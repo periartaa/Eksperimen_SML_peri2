@@ -27,10 +27,10 @@ jobs:
           pip install mlflow==2.11.3 scikit-learn==1.4.1 pandas==2.2.1
 
       - name: Run MLflow Project (Model Retraining)
-        # Jalankan script Python langsung, bukan menggunakan 'mlflow run'
         run: |
           cd MLProject
-          python modelling.py --input_data "namadataset_preprocessing/iris_processed.csv"
+          # Gunakan --no-conda untuk menghindari pembuatan environment baru
+          mlflow run . --no-conda
         env:
           MLFLOW_TRACKING_URI: file:./mlruns
 
