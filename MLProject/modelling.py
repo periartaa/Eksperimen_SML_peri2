@@ -1,13 +1,10 @@
-# MLProject/modelling.py
-
 import pandas as pd
-import sys
-import argparse
 import os
+import sys
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 import mlflow
 import mlflow.sklearn
@@ -17,20 +14,17 @@ def load_processed_data(input_path):
     Memuat dataset yang sudah diproses dari file CSV.
     """
     try:
-        print(f"Mengambil data dari path: {input_path}")
-        
-        if not os.path.exists(input_path):
-            raise FileNotFoundError(f"File tidak ditemukan: {input_path}")
-            
         df = pd.read_csv(input_path)
-        print(f" Dataset berhasil dimuat. Shape: {df.shape}")
+        print("✅ Dataset processed berhasil dimuat")
+        print(f"Shape dataset: {df.shape}")
         return df
-        
-    except FileNotFoundError as e:
-        print(f" ERROR: {e}")
+    except FileNotFoundError:
+        print(f"❌ File tidak ditemukan: {input_path}")
+        print(f"Current directory: {os.getcwd()}")
+        print(f"Files in current directory: {os.listdir('.')}")
         sys.exit(1)
     except Exception as e:
-        print(f" Error saat memuat dataset: {e}")
+        print(f"❌ Error saat memuat dataset: {e}")
         sys.exit(1)
 
 def train_model(df):
@@ -43,69 +37,94 @@ def train_model(df):
     
     # Memisahkan fitur (X) dan target (y)
     target_columns = [col for col in df.columns if col.startswith('Species_')]
-    feature_columns = [col for col in df.columns if col not in target_columns and col != 'Unnamed: 0']
+    feature_columns = [col for col in df.columns if col not in target_columns]
     
     if not target_columns:
-        print(" ERROR: Kolom target 'Species_' tidak ditemukan.")
+        print("❌ Kolom target 'Species_' tidak ditemukan.")
+        print(f"Available columns: {df.columns.tolist()}")
         return
 
     X = df[feature_columns]
     y_ohe = df[target_columns] 
-    y = y_ohe.idxmax(axis=1)
     
-    print(f" Fitur: {X.shape[1]} kolom")
-    print(f" Target classes: {y.unique()}")
+    # Mengkonversi OHE ke Label Tunggal (1D Array)
+    y = y_ohe.idxmax(axis=1) 
     
     # Pisahkan data latih dan data uji
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=42, stratify=y
     )
     
-    # Setup MLflow - menggunakan local artifact
-    experiment_name = "Iris_Classification_CI_Skilled"
-    mlflow.set_tracking_uri("./mlruns")  # Local directory
-    mlflow.set_experiment(experiment_name)
+    print(f"Shape X_train: {X_train.shape}")
+    print(f"Shape y_train: {y_train.shape}")
+    print(f"Shape X_test: {X_test.shape}")
     
     # AKTIVASI MLFLOW AUTOLOG
     mlflow.sklearn.autolog()
     
+    # Menentukan nama eksperimen
+    experiment_name = "Iris_Classification_CI"
+    mlflow.set_experiment(experiment_name)
+    
+    # Memulai run MLflow
     with mlflow.start_run() as run:
+        # Menambahkan tag
         mlflow.set_tag("model_type", "Logistic Regression")
-        mlflow.set_tag("workflow", "github_actions_ci")
-        mlflow.log_param("test_size", 0.3)
-        mlflow.log_param("random_state", 42)
+        mlflow.set_tag("data_split", "70-30")
+        mlflow.set_tag("environment", "CI/CD Pipeline")
         
         # Inisialisasi dan latih model
-        model = LogisticRegression(solver='lbfgs', multi_class='auto', max_iter=1000, random_state=42)
+        model = LogisticRegression(
+            solver='lbfgs', 
+            multi_class='auto', 
+            max_iter=1000, 
+            random_state=42
+        )
+        
         model.fit(X_train, y_train) 
         
+        # Prediksi dan evaluasi
         y_pred = model.predict(X_test)
         
-        # Evaluasi
+        # Hitung metrik
         accuracy = accuracy_score(y_test, y_pred)
-        mlflow.log_metric("accuracy", accuracy)
+        precision = precision_score(y_test, y_pred, average='weighted')
+        recall = recall_score(y_test, y_pred, average='weighted')
+        f1 = f1_score(y_test, y_pred, average='weighted')
         
-        print(f"\n Model berhasil dilatih. Run ID: {run.info.run_id}")
-        print(f" Akurasi pada data uji: {accuracy:.4f}")
+        # Log metrik tambahan
+        mlflow.log_metric("test_accuracy", accuracy)
+        mlflow.log_metric("test_precision", precision)
+        mlflow.log_metric("test_recall", recall)
+        mlflow.log_metric("test_f1", f1)
         
-    print("\n Model Training Selesai!")
+        print("\n✅ Model berhasil dilatih.")
+        print(f"MLflow Run ID: {run.info.run_id}")
+        print("\n📊 Evaluasi Model:")
+        print(f"  - Accuracy:  {accuracy:.4f}")
+        print(f"  - Precision: {precision:.4f}")
+        print(f"  - Recall:    {recall:.4f}")
+        print(f"  - F1 Score:  {f1:.4f}")
+        
+    print("\n🎯 Model Training Selesai!")
 
 def main():
-    parser = argparse.ArgumentParser(description="Menjalankan training model Iris Classification.")
-    parser.add_argument("--input_data", type=str, required=True, 
-                        help="Path relatif ke file CSV data yang sudah diproses.")
+    """
+    Fungsi utama untuk menjalankan pipeline modeling.
+    """
+    # Ambil path dari argument atau gunakan default
+    if len(sys.argv) > 1:
+        processed_file_path = sys.argv[1]
+    else:
+        processed_file_path = 'iris_processed.csv'
     
-    args = parser.parse_args()
+    print(f"📂 Loading data from: {processed_file_path}")
     
-    print("="*50)
-    print("IRIS CLASSIFICATION TRAINING")
-    print("="*50)
-    print(f"Input data: {args.input_data}")
+    # 1. Load data
+    df_processed = load_processed_data(processed_file_path)
     
-    df_processed = load_processed_data(args.input_data)
-    
-    if df_processed is not None:
-        train_model(df_processed)
+    # 2. Train model dengan MLflow Autolog
+    train_model(df_processed)
 
 if __name__ == "__main__":
     main()

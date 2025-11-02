@@ -1,8 +1,11 @@
-# MLProject/MLproject
-name: Iris_Classification_CI
+name: iris_classification_workflow
 
 conda_env: conda.yaml
 
 entry_points:
   main:
-    command: "python modelling.py --input_data data/iris_processed.csv"
+    parameters:
+      input_path:
+        type: string
+        default: "iris_processed.csv"
+    command: "python modelling.py {input_path}"
