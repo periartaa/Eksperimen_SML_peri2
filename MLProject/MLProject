@@ -10,4 +10,4 @@ parameters:
 entry_points:
   main:
     command: "python modelling.py --input_data {input_data}"
-    parameters: [input_data]
+    parameters: []
