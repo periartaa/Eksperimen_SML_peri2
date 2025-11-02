@@ -1,15 +1,13 @@
-# MLProject/conda.yaml
-
 name: iris_ci_env
 
 channels:
-  - defaults
   - conda-forge
+  - defaults
 
 dependencies:
   - python=3.9
-  - pip
+  - pip=23.3.2
+  - scikit-learn=1.4.1
+  - pandas=2.2.1
   - pip:
     - mlflow==2.11.3
-    - scikit-learn==1.4.1
-    - pandas==2.2.1
