@@ -1,12 +1,13 @@
+# MLProject
 name: Iris-Classification-CI
 
 parameters:
   input_data:
-    type: string
+    type: str
     default: "namadataset_preprocessing/iris_processed.csv"
 
 entry_points:
   main:
     parameters:
-      input_data: {type: string, default: "namadataset_preprocessing/iris_processed.csv"}
+      input_data: {type: str}
     command: "python modelling.py --input_data {input_data}"
