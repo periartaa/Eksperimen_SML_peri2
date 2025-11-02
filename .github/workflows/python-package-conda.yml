@@ -2,7 +2,6 @@
 
 name: Model Retraining Workflow
 
-# Trigger workflow ketika ada push
 on:
   push:
     branches:
@@ -24,27 +23,20 @@ jobs:
           python-version: '3.9'
 
       - name: Install Dependencies
-        # Menginstal MLflow dan dependensi
-        run: pip install mlflow pandas scikit-learn
+        run: |
+          pip install mlflow==2.11.3 scikit-learn==1.4.1 pandas==2.2.1
 
       - name: Run MLflow Project (Model Retraining)
-        # Menjalankan project, hasil tracking disimpan ke MLProject/mlruns
+        # Jalankan script Python langsung, bukan menggunakan 'mlflow run'
         run: |
           cd MLProject
-          # Perintah ini menjalankan modelling.py dan mencatat ke folder mlruns
-          mlflow run .
+          python modelling.py --input_data "namadataset_preprocessing/iris_processed.csv"
         env:
-          # Mengarahkan MLflow Tracking ke folder lokal 'mlruns'
           MLFLOW_TRACKING_URI: file:./mlruns
 
-      # =========================================================
-      # KRITERIA SKILLED (3 PTS): MENYIMPAN ARTEFAK 
-      # =========================================================
       - name: Upload MLflow Artifacts to GitHub
         uses: actions/upload-artifact@v4
         with:
-          # Nama Artifact unik, menggunakan SHA commit
           name: mlflow-artifacts-model-${{ github.sha }}
-          # Path folder yang berisi semua data MLflow (model, logs, dll.)
           path: MLProject/mlruns
           retention-days: 7
